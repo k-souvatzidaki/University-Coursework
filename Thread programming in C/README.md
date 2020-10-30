@@ -1,11 +1,11 @@
-## Thread Programming in C
+# Thread Programming in C
 
-# About
+## About
 This was a group project for the Operating Systems course. It's a ticket booking app in C. A number of customers want to book and pay for a number of seats on a venue, 
 and a number of phone operators and cashiers are available to serve them. It's basically the **producer-consumer** problem with threads.
 We implemented this on a virtual machine running Ubuntu Linux. 
 
-# Description
+## Description
 We have a 2-dimension array representing the venue's seat plan, a number of telephone operators and a number of cashiers. For each new customer, a new **thread** is created. 
 The threads run the **customer** function, which implements the steps of a ticket booking:
 1. Wait to be connected with a phone operator, if none is available when the thread is created.
@@ -21,12 +21,12 @@ Only one thread at a time is allowed to access any variable or array. We are usi
 or cashier is freed.
 The **header** file includes all the constants and function signatures.
 
-# Inputs
+## Inputs
 The inputs given to the program are the number of total customers, and a random number generator seed. 
 The random generator is used to calculate the amount of time a customer waits for a payment to be done, and also the posibility for a credit card to not be accepted
 
-# Outputs
+## Outputs
 The outputs are the total revenues from tickets ,the number of succesful and failed transactions, the average waiting and service times.
 
-# Group
+## Group
 I did this project with [Foivos Charalampakos](https://github.com/wolfie00) and [Marilena Kokkini](https://github.com/MarilenaKokkini)

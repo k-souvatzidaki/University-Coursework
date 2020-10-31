@@ -1,4 +1,4 @@
-## MIPS32 Assembly
+# MIPS32 Assembly
 
 For the Computer Systems Organization course, I did 2 assignments in Assembly.
 The first one, a program that given two integers as input, it calculates their **greatest common divisor**.

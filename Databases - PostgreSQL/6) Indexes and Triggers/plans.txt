@@ -1,0 +1,454 @@
+
+=====================================================================================================================================================================================================
+
+/* ASSIGNMENT 6 QUERIES */ 
+
+======================================================================================================================================================================================================
+
+
+
+/* Query 1: w/out index: 270.681 ms ; w/index: 151.579 ms; 
+   Εδώ φτιάξαμε ευρετήριο για το listing_id του πίνακα Review με το σκεπτικό ότι στην πρόταση WHERE
+   θα γίνονται αναζητήσεις στον πίνακα Review με βάση το πεδίο αυτό. Το πεδίο id του Listing , το οποίο βρίσκεται επίσης στην WHERE, 
+   είναι ήδη indexed επειδή είναι πρωτεύον κλειδί.*/
+   
+EXPLAIN ANALYZE SELECT Listing.id, COUNT(*) 
+FROM Listing,Review
+WHERE Listing.id = Review.listing_id
+GROUP BY Listing.id;
+
+--BEFORE INDEX 
+
+                                                                   QUERY PLAN
+-------------------------------------------------------------------------------------------------------------------------------------------------
+ GroupAggregate  (cost=10000020936.01..10000024374.94 rows=9663 width=12) (actual time=132.485..269.046 rows=6007 loops=1)
+   Group Key: listing.id
+   ->  Merge Join  (cost=10000020936.01..10000023605.56 rows=134550 width=4) (actual time=132.320..233.892 rows=134550 loops=1)
+         Merge Cond: (review.listing_id = listing.id)
+         ->  Sort  (cost=10000020935.67..10000021272.04 rows=134550 width=4) (actual time=132.295..167.286 rows=134550 loops=1)
+               Sort Key: review.listing_id
+               Sort Method: external merge  Disk: 1848kB
+               ->  Seq Scan on review  (cost=10000000000.00..10000007632.50 rows=134550 width=4) (actual time=0.005..52.541 rows=134550 loops=1)
+         ->  Index Only Scan using listings_pkey on listing  (cost=0.29..661.23 rows=9663 width=4) (actual time=0.017..2.724 rows=9386 loops=1)
+               Heap Fetches: 0
+ Planning time: 0.238 ms
+ Execution time: 270.681 ms
+(12 rows)
+
+
+--AFTER INDEX 
+
+                                                                       QUERY PLAN
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+ HashAggregate  (cost=5314.79..5411.42 rows=9663 width=12) (actual time=148.282..150.333 rows=6007 loops=1)
+   Group Key: listing.id
+   ->  Hash Join  (cost=782.44..4642.04 rows=134550 width=4) (actual time=5.400..106.376 rows=134550 loops=1)
+         Hash Cond: (review.listing_id = listing.id)
+         ->  Index Only Scan using review_listing_id on review  (cost=0.42..3506.67 rows=134550 width=4) (actual time=0.015..37.064 rows=134550 loops=1)
+               Heap Fetches: 0
+         ->  Hash  (cost=661.23..661.23 rows=9663 width=4) (actual time=5.356..5.357 rows=9663 loops=1)
+               Buckets: 16384  Batches: 1  Memory Usage: 468kB
+               ->  Index Only Scan using listings_pkey on listing  (cost=0.29..661.23 rows=9663 width=4) (actual time=0.006..2.626 rows=9663 loops=1)
+                     Heap Fetches: 0
+ Planning time: 0.249 ms
+ Execution time: 151.579 ms
+(12 rows)
+
+
+
+
+
+/* Query 2: w/out index: 11.305 ms ; w/index: 0.555  ms; 
+   Εδώ επιλέξαμε να φτιάξουμε ευρετήριο για όλα τα πεδία που βρίσκονται στην πρόταση WHERE, αφού με βάση
+   και τις τρείς αυτές κολώνες γίνονται οι αναζητήσεις.*/
+
+EXPLAIN ANALYZE SELECT id,listing_url,review_scores_rating,price
+FROM Listing
+WHERE guests_included>5 AND review_scores_rating>90 AND price < 300;
+
+--BEFORE INDEX
+
+                                                        QUERY PLAN
+---------------------------------------------------------------------------------------------------------------------------
+ Seq Scan on listing  (cost=10000000000.00..10000002363.10 rows=152 width=77) (actual time=0.112..11.236 rows=142 loops=1)
+   Filter: ((guests_included > 5) AND (review_scores_rating > '90'::numeric) AND (price < '300'::numeric))
+   Rows Removed by Filter: 9521
+ Planning time: 0.107 ms
+ Execution time: 11.305 ms
+(5 rows)
+
+--AFTER INDEX
+
+                                                         QUERY PLAN
+-----------------------------------------------------------------------------------------------------------------------------
+ Bitmap Heap Scan on listing  (cost=20.22..491.00 rows=149 width=77) (actual time=0.131..0.507 rows=142 loops=1)
+   Recheck Cond: ((guests_included > 5) AND (review_scores_rating > '90'::numeric) AND (price < '300'::numeric))
+   Heap Blocks: exact=134
+   ->  Bitmap Index Scan on listing_query_2  (cost=0.00..20.18 rows=149 width=0) (actual time=0.113..0.113 rows=142 loops=1)
+         Index Cond: ((guests_included > 5) AND (review_scores_rating > '90'::numeric) AND (price < '300'::numeric))
+ Planning time: 0.263 ms
+ Execution time: 0.555 ms
+(7 rows)
+
+
+
+======================================================================================================================================================================================================
+
+/* ASSIGNMENT 5 QUERIES */
+
+======================================================================================================================================================================================================
+
+
+
+
+/* Assignment Query 1: w/out index: 199.201 ms ; w/index: 202.923 ms (no change) ; 
+   Στο συγκεκριμένο ερώτημα, καταλήξαμε στο συμπέρασμα οτι κανένα index δεν μπορεί να βελτιώσει τον χρόνο 
+   εκτέλεσης του, διότι όλες οι κολώνες που χρησιμοποιούνται είναι είτε πρωτεύοντα κλειδία (amenity_id του Amenity, id του Listing),
+   είτε υποψήφια πρωτεύοντα κλειδιά (candidate) (amenity_name του Amenity) ή υποσύνολα των πρωτεύοντων κλειδιών (listing_id του Listing_Amenity)
+   Δοκιμάσαμε μάλιστα να δημιουργήσουμε indexes για όλα τα παραπάνω, και κανένας συνδυασμός δεν έφερε διαφορά στον χρόνο.*/
+   
+EXPLAIN ANALYZE SELECT id,name,COUNT(amenity_id) 
+FROM Listing_Amenity 
+INNER JOIN Listing 
+ON listing_id =id
+WHERE amenity_id NOT IN( SELECT amenity_id FROM Amenity WHERE amenity_name = '')
+GROUP BY id;
+
+--BEFORE INDEX 
+
+                                                                                     QUERY PLAN                                                                         
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ GroupAggregate  (cost=10000000002.36..10000018207.47 rows=9663 width=45) (actual time=0.065..197.287 rows=9535 loops=1)
+   Group Key: listing.id
+   ->  Merge Join  (cost=10000000002.36..10000017680.53 rows=86062 width=41) (actual time=0.038..151.848 rows=171995 loops=1)
+         Merge Cond: (listing_amenity.listing_id = listing.id)
+         ->  Index Only Scan using listing_amenity_pkey on listing_amenity  (cost=10000000002.07..10000007562.23 rows=86062 width=8) (actual time=0.028..61.075 rows=171995 loops=1)
+               Filter: (NOT (hashed SubPlan 1))
+               Rows Removed by Filter: 128
+               Heap Fetches: 0
+               SubPlan 1
+                 ->  Seq Scan on amenity  (cost=10000000000.00..10000000001.65 rows=1 width=4) (actual time=0.006..0.011 rows=1 loops=1)
+                       Filter: (amenity_name = ''::text)
+                       Rows Removed by Filter: 51
+         ->  Index Scan using listings_pkey on listing  (cost=0.29..9018.38 rows=9663 width=37) (actual time=0.008..10.133 rows=9663 loops=1)
+ Planning time: 0.296 ms
+ Execution time: 199.201 ms
+(15 rows)
+
+
+--AFTER INDEX , no changes
+
+                                                                                     QUERY PLAN
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ GroupAggregate  (cost=10000000002.36..10000018236.52 rows=9663 width=45) (actual time=0.064..201.028 rows=9535 loops=1)
+   Group Key: listing.id
+   ->  Merge Join  (cost=10000000002.36..10000017709.58 rows=86062 width=41) (actual time=0.039..153.434 rows=171995 loops=1)
+         Merge Cond: (listing_amenity.listing_id = listing.id)
+         ->  Index Only Scan using listing_amenity_pkey on listing_amenity  (cost=10000000002.07..10000007562.23 rows=86062 width=8) (actual time=0.028..61.095 rows=171995 loops=1)
+               Filter: (NOT (hashed SubPlan 1))
+               Rows Removed by Filter: 128
+               Heap Fetches: 0
+               SubPlan 1
+                 ->  Seq Scan on amenity  (cost=10000000000.00..10000000001.65 rows=1 width=4) (actual time=0.004..0.009 rows=1 loops=1)
+                       Filter: (amenity_name = ''::text)
+                       Rows Removed by Filter: 51
+         ->  Index Scan using listings_pkey on listing  (cost=0.29..9047.42 rows=9663 width=37) (actual time=0.008..10.532 rows=9663 loops=1)
+ Planning time: 0.257 ms
+ Execution time: 202.923 ms
+(15 rows)
+
+
+
+
+/* Assignment Query 2: w/out index: 59.853 ms ; w/index: 52.549 ms (no change) ; 
+   Στο παρόν ερώτημα δοκιμάσαμε να φτιάξουμε ευρετήρια για όλα τα πεδία που δεν είναι πρωτεύοντα κλειδιά των 2 πινάκων που χρησιμοποιούνται
+   , listing_id, date του πίνακα Review, και το name του πίνακα Listing, αλλά κανένα δεν είχε βελτίωση στον χρόνο.*/
+
+EXPLAIN ANALYZE SELECT Listing.id,name, count(Review.id)
+FROM Listing
+INNER JOIN Review
+ON listing_id = Listing.id
+WHERE date >='2017/01/01' AND date <='2017/12/31'
+GROUP BY Listing.id
+HAVING count(Review.id) > 5
+ORDER BY count(Review.id);
+
+--BEFORE INDEX
+
+                                                                     QUERY PLAN
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=10000018944.35..10000018968.51 rows=9663 width=45) (actual time=59.450..59.622 rows=880 loops=1)
+   Sort Key: (count(review.id))
+   Sort Method: quicksort  Memory: 111kB
+   ->  GroupAggregate  (cost=10000009290.22..10000018304.75 rows=9663 width=45) (actual time=34.052..59.022 rows=880 loops=1)
+         Group Key: listing.id
+         Filter: (count(review.id) > 5)
+         Rows Removed by Filter: 2102
+         ->  Merge Join  (cost=10000009290.22..10000018101.09 rows=14270 width=41) (actual time=34.018..54.648 rows=13785 loops=1)
+               Merge Cond: (listing.id = review.listing_id)
+               ->  Index Scan using listings_pkey on listing  (cost=0.29..9018.38 rows=9663 width=37) (actual time=0.010..7.906 rows=9387 loops=1)
+               ->  Sort  (cost=10000009289.93..10000009325.60 rows=14270 width=8) (actual time=34.000..37.976 rows=13785 loops=1)
+                     Sort Key: review.listing_id
+                     Sort Method: quicksort  Memory: 1031kB
+                     ->  Seq Scan on review  (cost=10000000000.00..10000008305.25 rows=14270 width=8) (actual time=0.017..28.616 rows=13785 loops=1)
+                           Filter: ((date >= '2017-01-01'::date) AND (date <= '2017-12-31'::date))
+                           Rows Removed by Filter: 120765
+ Planning time: 0.309 ms
+ Execution time: 59.853 ms
+(18 rows)
+
+
+--AFTER INDEX, no change
+
+                                                            QUERY PLAN
+-----------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=11599.50..11623.65 rows=9663 width=45) (actual time=51.971..52.145 rows=880 loops=1)
+   Sort Key: (count(review.id))
+   Sort Method: quicksort  Memory: 111kB
+   ->  HashAggregate  (cost=10863.26..10959.89 rows=9663 width=45) (actual time=50.675..51.595 rows=880 loops=1)
+         Group Key: listing.id
+         Filter: (count(review.id) > 5)
+         Rows Removed by Filter: 2103
+         ->  Hash Join  (cost=2417.42..10758.81 rows=13926 width=41) (actual time=9.276..45.417 rows=13786 loops=1)
+               Hash Cond: (review.listing_id = listing.id)
+               ->  Seq Scan on review  (cost=0.00..8304.83 rows=13926 width=8) (actual time=0.014..28.704 rows=13786 loops=1)
+                     Filter: ((date >= '2017-01-01'::date) AND (date <= '2017-12-31'::date))
+                     Rows Removed by Filter: 120736
+               ->  Hash  (cost=2296.63..2296.63 rows=9663 width=37) (actual time=9.196..9.196 rows=9663 loops=1)
+                     Buckets: 16384  Batches: 1  Memory Usage: 787kB
+                     ->  Seq Scan on listing  (cost=0.00..2296.63 rows=9663 width=37) (actual time=0.003..5.750 rows=9663 loops=1)
+ Planning time: 0.280 ms
+ Execution time: 52.549 ms
+(17 rows)
+ 
+
+/* Assignment Query 3: w/out index: 4305.689 ms ; w/index: 3469.769 ms; 
+   Για το συγκεκριμένο ερώτημα, δοκιμάσαμε να δημιουργήσουμε ένα ευρετήριο για τις κολώνες listing_id,date,price,
+   και είδαμε πάρα πολύ μικρή διαφορά στο execution time. Επίσης δοκιμάσαμε ευρετήρια με μόνο την τιμή, και με τα listing_id και price
+   τα οποία δεν χρησιμοποιήθηκαν καν απο το ερώτημα μας.*/
+
+EXPLAIN ANALYZE SELECT id,name, avg(Calendar.price)
+FROM Listing
+INNER JOIN Calendar
+ON listing_id=id
+WHERE date>='2017/01/01' AND date<='2017/12/31'
+GROUP BY id
+HAVING avg(Calendar.price) < 50;
+
+--BEFORE INDEX 
+
+                                                                             QUERY PLAN
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Finalize HashAggregate  (cost=133555.21..133700.16 rows=9663 width=69) (actual time=4297.237..4304.765 rows=562 loops=1)
+   Group Key: listing.id
+   Filter: (avg(calendar.price) < '50'::numeric)
+   Rows Removed by Filter: 9101
+   ->  Gather  (cost=131260.25..133313.64 rows=19326 width=69) (actual time=4249.751..4273.887 rows=17329 loops=1)
+         Workers Planned: 2
+         Workers Launched: 2
+         ->  Partial HashAggregate  (cost=130260.25..130381.04 rows=9663 width=69) (actual time=4240.621..4249.446 rows=5776 loops=3)
+               Group Key: listing.id
+               ->  Hash Join  (cost=83827.29..124212.39 rows=1209572 width=42) (actual time=581.932..3523.718 rows=968035 loops=3)
+                     Hash Cond: (calendar.listing_id = listing.id)
+                     ->  Parallel Bitmap Heap Scan on calendar  (cost=74688.12..111896.71 rows=1209572 width=9) (actual time=553.670..2373.744 rows=968035 loops=3)
+                           Recheck Cond: ((date >= '2017-01-01'::date) AND (date <= '2017-12-31'::date))
+                           Heap Blocks: exact=6293
+                           ->  Bitmap Index Scan on calendar_pkey  (cost=0.00..73962.38 rows=2902974 width=0) (actual time=549.847..549.847 rows=2904105 loops=1)
+                                 Index Cond: ((date >= '2017-01-01'::date) AND (date <= '2017-12-31'::date))
+                     ->  Hash  (cost=9018.38..9018.38 rows=9663 width=37) (actual time=28.197..28.197 rows=9663 loops=3)
+                           Buckets: 16384  Batches: 1  Memory Usage: 787kB
+                           ->  Index Scan using listings_pkey on listing  (cost=0.29..9018.38 rows=9663 width=37) (actual time=0.012..22.697 rows=9663 loops=3)
+ Planning time: 5.189 ms
+ Execution time: 4305.689 ms
+(21 rows)
+
+--AFTER INDEX 
+
+                                                                                      QUERY PLAN                                                                        
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Finalize HashAggregate  (cost=123248.11..123393.05 rows=9663 width=69) (actual time=3463.701..3469.376 rows=562 loops=1)
+   Group Key: listing.id
+   Filter: (avg(calendar.price) < '50'::numeric)
+   Rows Removed by Filter: 9101
+   ->  Gather  (cost=120953.14..123006.53 rows=19326 width=69) (actual time=3436.007..3448.128 rows=10355 loops=1)
+         Workers Planned: 2
+         Workers Launched: 2
+         ->  Partial HashAggregate  (cost=119953.14..120073.93 rows=9663 width=69) (actual time=3431.266..3435.693 rows=3452 loops=3)
+               Group Key: listing.id
+               ->  Hash Join  (cost=9144.37..113937.42 rows=1203145 width=42) (actual time=34.554..2444.138 rows=968035 loops=3)
+                     Hash Cond: (calendar.listing_id = listing.id)
+                     ->  Parallel Index Only Scan using listingid_date_price on calendar  (cost=0.43..101633.83 rows=1203145 width=9) (actual time=0.034..870.177 rows=968035 loops=3)
+                           Index Cond: ((date >= '2017-01-01'::date) AND (date <= '2017-12-31'::date))
+                           Heap Fetches: 0
+                     ->  Hash  (cost=9023.16..9023.16 rows=9663 width=37) (actual time=34.459..34.459 rows=9663 loops=3)
+                           Buckets: 16384  Batches: 1  Memory Usage: 787kB
+                           ->  Index Scan using listings_pkey on listing  (cost=0.29..9023.16 rows=9663 width=37) (actual time=0.014..23.843 rows=9663 loops=3)
+ Planning time: 0.358 ms
+ Execution time: 3469.769 ms
+(19 rows)
+
+
+
+
+
+/* Assignment Query 4: w/out index: 39.857 ms ; w/index: 21.490 ms; 
+   Σε αυτό το ερώτημα επιλέξαμε να φτιάξουμε ευρετήριο για τις στήλες neighborhood, price του πίνακα Listing,
+   επειδή αυτά τα πεδία χρησιμοποιούνται για την σύζευξη του πίνακα με τον Neighborhood, και τον υπολογισμό
+   του MIN των τιμών με βάση το όνομα της γειτονιάς. Οπότε με ένα τέτοιο ευρετήριο η psql , αντι να κάνει αναζητήσεις
+   σε όλο τον πίνακα Listing με βάση το όνομα της γειτονιάς, διατρέχει το ευρετήριο και βρίσκει γρήγορα όλες τις τιμές
+   για κάθε γειτονιά. */
+   
+EXPLAIN ANALYZE SELECT neighborhood_name, MIN(price)
+FROM Listing
+INNER JOIN Neighborhood
+ON neighborhood_name = neighborhood
+group by neighborhood_name;
+
+--BEFORE INDEX 
+
+                                                                      QUERY PLAN
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+ GroupAggregate  (cost=10000002930.38..10000003191.29 rows=81 width=44) (actual time=21.363..39.780 rows=81 loops=1)
+   Group Key: neighborhood.neighborhood_name
+   ->  Merge Join  (cost=10000002930.38..10000003123.99 rows=13297 width=16) (actual time=21.119..34.792 rows=14020 loops=1)
+         Merge Cond: ((neighborhood.neighborhood_name)::text = (listing.neighborhood)::text)
+         ->  Index Only Scan using neighborhood_pkey on neighborhood  (cost=0.14..10.03 rows=126 width=12) (actual time=0.441..0.485 rows=126 loops=1)
+               Heap Fetches: 0
+         ->  Sort  (cost=10000002930.24..10000002954.39 rows=9663 width=16) (actual time=20.669..27.709 rows=14021 loops=1)
+               Sort Key: listing.neighborhood
+               Sort Method: quicksort  Memory: 978kB
+               ->  Seq Scan on listing  (cost=10000000000.00..10000002290.63 rows=9663 width=16) (actual time=0.008..12.953 rows=9663 loops=1)
+ Planning time: 5.331 ms
+ Execution time: 39.857 ms
+(12 rows)
+
+--AFTER INDEX 
+
+                                                                      QUERY PLAN
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+ GroupAggregate  (cost=0.43..7136.73 rows=81 width=44) (actual time=0.350..21.423 rows=81 loops=1)
+   Group Key: neighborhood.neighborhood_name
+   ->  Merge Join  (cost=0.43..7069.44 rows=13297 width=16) (actual time=0.029..16.932 rows=14020 loops=1)
+         Merge Cond: ((neighborhood.neighborhood_name)::text = (listing.neighborhood)::text)
+         ->  Index Only Scan using neighborhood_pkey on neighborhood  (cost=0.14..10.03 rows=126 width=12) (actual time=0.011..0.048 rows=126 loops=1)
+               Heap Fetches: 0
+         ->  Materialize  (cost=0.29..9076.34 rows=9663 width=16) (actual time=0.014..10.235 rows=14021 loops=1)
+               ->  Index Only Scan using neigh_prices on listing  (cost=0.29..9052.18 rows=9663 width=16) (actual time=0.011..5.473 rows=7332 loops=1)
+                     Heap Fetches: 7332
+ Planning time: 0.297 ms
+ Execution time: 21.490 ms
+(11 rows)
+
+
+
+
+/* Assignment Query 5: w/out index: 215.398 ms ; w/index: 201.366 ms (no change) ; 
+   Σ'αυτό το query ,κανένα ευρετήριο δεν βελτιώνει τον χρόνο εκτέλεσης, αφού τα πεδία που χρησιμοποιούνται είναι είτε πρωτεύοντα κλειδία,
+   είτε υποψήφια πρωτεύοντα κλειδιά ή υποσύνολα των πρωτεύοντων κλειδιών
+   Δοκιμάσαμε να δημιουργήσουμε indexes για όλα τα παραπάνω, και κανένας συνδυασμός δεν βελτίωσε τον χρόνο εκτέλεσης. (Όμοια με ερώτημα 1)*/
+
+EXPLAIN ANALYZE SELECT amenity_name, COUNT(listing_id)
+FROM Amenity 
+INNER JOIN  Listing_Amenity
+ON Amenity.amenity_id = Listing_Amenity.amenity_id
+GROUP BY amenity_name;
+
+--BEFORE INDEX
+
+                                                                                          QUERY PLAN                                                                    
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Finalize GroupAggregate  (cost=7716.38..7717.68 rows=52 width=22) (actual time=215.130..215.219 rows=52 loops=1)
+   Group Key: amenity.amenity_name
+   ->  Sort  (cost=7716.38..7716.64 rows=104 width=22) (actual time=215.123..215.153 rows=154 loops=1)
+         Sort Key: amenity.amenity_name
+         Sort Method: quicksort  Memory: 35kB
+         ->  Gather  (cost=7701.98..7712.90 rows=104 width=22) (actual time=212.803..215.023 rows=154 loops=1)
+               Workers Planned: 2
+               Workers Launched: 2
+               ->  Partial HashAggregate  (cost=6701.98..6702.50 rows=52 width=22) (actual time=196.106..196.122 rows=51 loops=3)
+                     Group Key: amenity.amenity_name
+                     ->  Hash Join  (cost=13.99..6343.39 rows=71718 width=18) (actual time=5.136..142.551 rows=57374 loops=3)
+                           Hash Cond: (listing_amenity.amenity_id = amenity.amenity_id)
+                           ->  Parallel Index Only Scan using listing_amenity_pkey on listing_amenity  (cost=0.42..6126.21 rows=71718 width=8) (actual time=1.237..63.239 rows=57374 loops=3)
+                                 Heap Fetches: 0
+                           ->  Hash  (cost=12.92..12.92 rows=52 width=18) (actual time=3.867..3.868 rows=52 loops=3)
+                                 Buckets: 1024  Batches: 1  Memory Usage: 11kB
+                                 ->  Index Scan using amenity_pkey on amenity  (cost=0.14..12.92 rows=52 width=18) (actual time=3.829..3.845 rows=52 loops=3)
+ Planning time: 1.597 ms
+ Execution time: 215.398 ms
+(19 rows)
+
+
+--AFTER INDEX , no changes
+
+                                                                                          QUERY PLAN
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Finalize GroupAggregate  (cost=7716.38..7717.68 rows=52 width=22) (actual time=201.140..201.236 rows=52 loops=1)
+   Group Key: amenity.amenity_name
+   ->  Sort  (cost=7716.38..7716.64 rows=104 width=22) (actual time=201.133..201.162 rows=155 loops=1)
+         Sort Key: amenity.amenity_name
+         Sort Method: quicksort  Memory: 35kB
+         ->  Gather  (cost=7701.98..7712.90 rows=104 width=22) (actual time=198.396..200.958 rows=155 loops=1)
+               Workers Planned: 2
+               Workers Launched: 2
+               ->  Partial HashAggregate  (cost=6701.98..6702.50 rows=52 width=22) (actual time=192.307..192.321 rows=52 loops=3)
+                     Group Key: amenity.amenity_name
+                     ->  Hash Join  (cost=13.99..6343.39 rows=71718 width=18) (actual time=0.078..129.954 rows=57374 loops=3)
+                           Hash Cond: (listing_amenity.amenity_id = amenity.amenity_id)
+                           ->  Parallel Index Only Scan using listing_amenity_pkey on listing_amenity  (cost=0.42..6126.21 rows=71718 width=8) (actual time=0.011..41.185 rows=57374 loops=3)
+                                 Heap Fetches: 0
+                           ->  Hash  (cost=12.92..12.92 rows=52 width=18) (actual time=0.041..0.041 rows=52 loops=3)
+                                 Buckets: 1024  Batches: 1  Memory Usage: 11kB
+                                 ->  Index Scan using amenity_pkey on amenity  (cost=0.14..12.92 rows=52 width=18) (actual time=0.006..0.022 rows=52 loops=3)
+ Planning time: 0.244 ms
+ Execution time: 201.366 ms
+(19 rows)
+
+
+
+
+/* Assignment Query 6: w/out index: 6280.123 ms ; w/index: 2297.437 ms; 
+   Χρησιμοποιήσαμε το συγκεκριμένο ευρετήριο ώστε μόλις εκτελείται η group by εντολή,τα αποτελέσματα (μέγιστη τιμή) πρέπει να εμφανιστούν
+   με βάση το listing_id, αντί να γίνονται αναζητήσεις στον πίνακα Calendar για όλες τις τιμές του κάθε listing_id ξεχωριστά, 
+   η psql τα βρίσκει αυτόματα χρησιμοποιώντας το ευρετήριο, πράγμα που επιταγχύνει σημαντικά την εκτέλεση του ερωτήματος.*/
+
+EXPLAIN ANALYZE SELECT listing_id, MAX(price) 
+FROM Calendar 
+GROUP BY listing_id
+ORDER BY listing_id DESC;
+
+--BEFORE INDEX 
+
+                                                                                   QUERY PLAN                                                                           
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Finalize GroupAggregate  (cost=1000.45..158101.81 rows=9617 width=36) (actual time=31.711..6276.975 rows=9663 loops=1)
+   Group Key: listing_id
+   ->  Gather Merge  (cost=1000.45..157909.47 rows=19234 width=36) (actual time=19.330..6262.051 rows=15452 loops=1)
+         Workers Planned: 2
+         Workers Launched: 2
+         ->  Partial GroupAggregate  (cost=0.43..154689.36 rows=9617 width=36) (actual time=2.467..5227.528 rows=5151 loops=3)
+               Group Key: listing_id
+               ->  Parallel Index Scan Backward using calendar_pkey on calendar  (cost=0.43..147245.29 rows=1469581 width=9) (actual time=0.797..4867.878 rows=1175665 loops=3)
+ Planning time: 2.117 ms
+ Execution time: 6280.123 ms
+(10 rows)
+
+--AFTER INDEX 
+
+                                                                                    QUERY PLAN                                                                          
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=97859.26..97883.31 rows=9617 width=36) (actual time=2293.497..2295.436 rows=9663 loops=1)
+   Sort Key: listing_id DESC
+   Sort Method: quicksort  Memory: 837kB
+   ->  Finalize HashAggregate  (cost=97126.86..97223.03 rows=9617 width=36) (actual time=2285.907..2289.155 rows=9663 loops=1)
+         Group Key: listing_id
+         ->  Gather  (cost=95011.12..97030.69 rows=19234 width=36) (actual time=2254.159..2271.784 rows=19679 loops=1)
+               Workers Planned: 2
+               Workers Launched: 2
+               ->  Partial HashAggregate  (cost=94011.12..94107.29 rows=9617 width=36) (actual time=2249.948..2253.798 rows=6560 loops=3)
+                     Group Key: listing_id
+                     ->  Parallel Index Only Scan using price_listingid on calendar  (cost=0.43..86663.22 rows=1469581 width=9) (actual time=0.018..1019.637 rows=1175665 loops=3)
+                           Heap Fetches: 0
+ Planning time: 0.143 ms
+ Execution time: 2297.437 ms
+(14 rows)

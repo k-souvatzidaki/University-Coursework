@@ -32,3 +32,5 @@ The outputs are the total revenues from tickets ,the number of succesful and fai
 
 ## Group
 I did this project with [Foivos Charalampakos](https://github.com/wolfie00) and [Marilena Kokkini](https://github.com/MarilenaKokkini)
+    
+*Spring 2018-19*

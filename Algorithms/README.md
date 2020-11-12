@@ -1,4 +1,4 @@
-# Algorithms - Spring 2018-19
+# Algorithms
 For the Algorithms course I studied some *algorithm writing techniques* such as **greedy algorithms, divide and conquer and dynamic programming**, and implemented several exercises in **Java**.
 
 ## Main 
@@ -12,3 +12,5 @@ In **ShortestPath.java** , given a **set of nodes in a row** (a *Directed Acycli
 
 ## Graph Problems
 In **ShortestCycle.java**, given a graph of philosophers, and the names of 2 philosophers, the algorithm uses **BFS** search to find the shortest cycle containing the 2 philosophers. In **VertexCover.java** I implemented a **brute force algorithm, and a greedy algorithm**, both to find the **vertex cover** of a graph (= the subset of vertices that cover all the edges). The graphs are implemented as HashMaps of Arraylists. 
+     
+*Spring 2018-19*

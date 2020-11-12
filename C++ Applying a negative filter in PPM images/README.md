@@ -6,3 +6,5 @@ and become more familiar with how files are stored in a computer. Seems like an 
 
 ## Group
 I did this project with [Foivos Charalampakos](https://github.com/wolfie00)
+    
+*Winter 2018-19*

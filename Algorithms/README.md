@@ -1,4 +1,4 @@
-# Algorithms
+# Algorithms - Spring 2018-19
 For the Algorithms course I studied some *algorithm writing techniques* such as **greedy algorithms, divide and conquer and dynamic programming**, and implemented several exercises in **Java**.
 
 ## Main 

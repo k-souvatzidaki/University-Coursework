@@ -24,7 +24,7 @@ Splitting a column with multiple values into a new table (for normalization).
 Some queries with aggregations.
 
 ## 6. Creating indexes and triggers
-Indexes to make previous queries execute faster, and a trigger and trigger function to increase/decrease a counter value each time a new row is inserted/removed.
+Indexes to make previous queries execute faster, and 2 triggers (and trigger functions).
 
 ## Project
 This project consisted of 2 parts: **First**, in the **Python** files **fix_airbnb_1.py**, **fix_airbnb_2.py** and **zillow.py**, we used the **psycopg2** module and connected to the AWS database to fetch tables and apply changes, while we also used the **csv** module to manipulate some additional .CSV file datasets. **Second**, we used pure **SQL** to insert the data from the CSV files to the database(**upload_data.sql**), and then to create some **views** (**RCP.sql**).

@@ -15,7 +15,7 @@ Creating tables and inserting data from .CSV files.
 Simple queries with joins.
 
 ## 3. Altering the database schema
-Do some changes to the tables.
+Doing some changes to the tables.
 
 ## 4. Splitting columns and creating new tables
 Splitting a column with multiple values into a new table (for normalization).

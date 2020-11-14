@@ -9,16 +9,22 @@ This was our first time writing SQL and creating a database schema from scratch.
 The datasets we used for this project were .CSV files with AirBnB and Zillow listings information. Unfortunately, I couldn't find the files and upload them here.. (it's been a while).
 
 ## 1. Creating the AirBnb database schema
+Creating tables and inserting data from .CSV files.
 
 ## 2. Writing queries
+Simple queries with joins.
 
 ## 3. Altering the database schema
+Do some changes to the tables.
 
 ## 4. Splitting columns and creating new tables
+Splitting a column with multiple values into a new table (for normalization).
 
-## 5. Writing GROUP BY queries (aggregations)
+## 5. Writing GROUP BY queries
+Some queries with aggregations.
 
 ## 6. Creating indexes and triggers
+Indexes to make previous queries execute faster, and a trigger and trigger function to increase/decrease a counter value each time a new row is inserted/removed.
 
 ## Project
 This project consisted of 2 parts: **First**, in the **Python** files **fix_airbnb_1.py**, **fix_airbnb_2.py** and **zillow.py**, we used the **psycopg2** module and connected to the AWS database to fetch tables and apply changes, while we also used the **csv** module to manipulate some additional .CSV file datasets. **Second**, we used pure **SQL** to insert the data from the CSV files to the database(**upload_data.sql**), and then to create some **views** (**RCP.sql**).

@@ -157,3 +157,44 @@ b = np.arange(9).reshape(3,3).T +1
 i3 = np.eye(3)
 i3b = np.concatenate([i3,b], axis=1)
 print(i3b) #[1 0 0 1 2 3][0 1 0 4 5 6][0 0 1 7 8 9]]
+print()
+
+# split
+a = np.arange(20) + 1
+b = np.array_split(a , 5) # [array([1 2 3 4]), array([5 6 7 8]), array([9 10 11 12]), array([13 14 15 16]), array([17 18 19 20])]
+print(b) 
+print()
+
+# random
+b = np.random.random((10,3)) #10x3 array of random numbers in [0,1)
+print(b)
+a = np.random.permutation(10)[0:3] #3 element array of random ints in [0,10)
+print(a)
+print(b[a]) #prints 3 lines of the array (with the random numbers as indexes)
+print()
+
+# Dtype
+# Arrays are defined to be within a data type ex. np.float32, np.float64, np.int8, np.int16, np.32, np.in64
+a = np.arange(10).reshape( (2,5) )
+b = np.array( [ [2.5,3.2], [6.8,8.9] ] )
+print(a.dtype) #dtype('int32')
+print(b.dtype) #dtype('float64')
+#!!!! 
+c = np.array( [ [2.5,3.2], [6.8,8.9] ], 
+             dtype=np.float32 )
+print(c) # array([[2.5, 3.2], [6.8, 8.9]])
+print(c.dtype) #float32 insted of float64
+#BUT
+e = np.array( [ [2.5,3.2], [6.8,8.9] ], 
+             dtype=np.int32 )
+print(e) #[[2,3][6,8]]
+print(e.dtype) #int32
+
+# to convert to another dtype ==> astype function
+g = c.astype(np.int32)
+print(g) #[[2,3][6,8]]
+d = np.array( [ [3,5], [8,13] ], dtype=np.int8 )
+f = d.astype( np.float64 ) # [[3.,5.], [8.13.]]
+print(f)
+print(f.dtype) #dtype('float64')
+print()

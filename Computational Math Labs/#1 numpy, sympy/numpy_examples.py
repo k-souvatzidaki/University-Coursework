@@ -198,3 +198,25 @@ f = d.astype( np.float64 ) # [[3.,5.], [8.13.]]
 print(f)
 print(f.dtype) #dtype('float64')
 print()
+
+# Operations between matrices
+# Addition - Elementwise
+a = np.arange(25).reshape( (5,5) ) 
+print(a + a) #array([[ 0,  2,  4,  6,  8],[10, 12, 14, 16, 18],[20, 22, 24, 26, 28],[30, 32, 34, 36, 38],[40, 42, 44, 46, 48]])
+# same with subtraction and multiplication
+print(a-a)
+print(a*a)
+print(np.multiply(a,a))
+
+# Matrix Multiplication: AxB=C, NxM × MxN =NxN - np.dot
+print(np.dot(a,a)) # array([[ 150,  160,  170,  180,  190],[ 400,  435,  470,  505,  540],[ 650,  710,  770,  830,  890],[ 900,  985, 1070, 1155, 1240],[1150, 1260, 1370, 1480, 1590]])
+
+# Matrix x vector: A × x=b, (N×m) × (M×1) =N×1 - np.dot
+x = np.array( [0,5,10,15,20] ).reshape( (-1,1) ) # array with 5 lines and 1 column
+print(x) # array([[0][5][10][15][20]])
+print(np.dot(a,x)) # array([[ 150], [ 400], [ 650],[ 900],[1150]]) #the first column of a x a
+
+# Vector x Vector
+# Dot/Inner/Scalar product 
+print(np.dot(x.T,x)) # array([[750]])
+# for elementwise: * or np.multiply (like arrays)

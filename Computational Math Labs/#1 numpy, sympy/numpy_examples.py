@@ -242,3 +242,44 @@ try:
     print(a.T/v)
 except: 
     print("ValueError: operands could not be broadcast together with shapes (4,3) (1,4) ")
+
+
+# Tile : Instead of broadcasting we can repeat the pattern using the np.tile( array, shape )
+a = np.array( [1,2,3] ).reshape( (-1,1) ) # [[1][2][3]]
+print(np.tile(a,(1,1))) # same
+print(np.tile(a,(1,10))) # [[1 1 1 1 1 1 1 1 1 1][2 2 2 2 2 2 2 2 2 2][3 3 3 3 3 3 3 3 3 3]]
+print(np.tile(a,(3,1))) # [[1][2][3][1][2][3][1][2][3]]
+print(np.tile(a, (2,3))) # [[1 1 1][2 2 2][3 3 3][1 1 1][2 2 2][3 3 3]]
+print()
+
+# Other operations
+# Determinant 
+a = np.array( [ [10,20], [30,40] ] ) #[[10 20][30 40]]
+b = np.linalg.det(a) 
+print(b) # |a| = -200.00000000001
+
+# Inversion 
+b = np.linalg.inv(a) # [[-0.2 0.1][0.15 -0.05]]
+print(b)
+
+# Argmax 
+# This kind of encoding is known as one-hot vector in machine learning. Instead of zeros and ones it could have real values to represent probabilities. 
+# Each row represent its percentage to be classified to a specific category(e.x. 5 columns = 5 classes/categories ). 
+# So argmax per row would choose the category/index that has the maximum probability/value.
+a = np.eye(5) # remember that it's an array of floats 0. 1. (not ints 0 1)
+a[ np.arange(5) ] = a[ np.random.permutation(5) ] 
+print(a) # rows randomly swapped
+print(np.argmax( a, axis=1 ))
+# example: 
+# a = [[0. 1. 0. 0. 0.] [1. 0. 0. 0. 0.] [0. 0. 0. 0. 1.] [0. 0. 0. 1. 0.] [0. 0. 1. 0. 0.]]
+# argmax = [1 0 4 3 2] = position of 1 in each row
+print()
+
+# Where (Given a condition returns the indices per dimension)
+a = np.arange( 15 ).reshape(3,5) #[[0 1 2 3 4][5 6 7 8 9][10 11 12 13 14]]
+b = np.where( a <= 5 )
+print(b) # [0 0 0 0 0 1][0 1 2 3 4 0] because the items <=5 are [0,0] [0,1] [0,2] [0,3] [0,4] and [1,0]
+try: 
+    print(b.T)
+except:
+    print("AttributeError: 'tuple' object has no attribute 'T'")

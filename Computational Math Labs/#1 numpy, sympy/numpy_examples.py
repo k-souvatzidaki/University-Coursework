@@ -220,3 +220,25 @@ print(np.dot(a,x)) # array([[ 150], [ 400], [ 650],[ 900],[1150]]) #the first co
 # Dot/Inner/Scalar product 
 print(np.dot(x.T,x)) # array([[750]])
 # for elementwise: * or np.multiply (like arrays)
+
+
+# Broadcast : when there is a mismaatch in array shapes during operations, replicate to match the dimension of the matrix the operation is done with 
+#ex. addition
+a = np.zeros( (5,5) )
+b = np.array( [1,2,3,4,5] ).reshape( (-1,1) ) #array([[1],[2],[3],[4],[5]])
+# broadcast per row: 
+print(a + b.T) # array([[1., 2., 3., 4., 5.], [1., 2., 3., 4., 5.], [1., 2., 3., 4., 5.], [1., 2., 3., 4., 5.], [1., 2., 3., 4., 5.]])
+print(a.T + b) # same
+print(a + b) # same
+
+#Exercise: For each cell calculate its percentage per row
+a = np.array( [ [1,1,2], [24,42,12], [10,20,30], [80,40,20] ] ).T # [[1 24 10 80][1 42 20 40][2 12 30 20]]
+# np.sum( a, axis=0 ) is the sum of each column (that's why we T - the sum of T's column = sum of a's line)
+v = np.sum(a,axis = 0) # [4 78 60 140]
+v = v.reshape(1,-1) # make v in row-vector form -> (1,4) to apply the / operator and broadcast it to each row
+# % = value / total
+print(a/v) # 3 x 4 array of %s (floats in [0,1])
+try: 
+    print(a.T/v)
+except: 
+    print("ValueError: operands could not be broadcast together with shapes (4,3) (1,4) ")

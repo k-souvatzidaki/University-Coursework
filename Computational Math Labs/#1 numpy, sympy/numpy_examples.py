@@ -497,4 +497,3 @@ if __name__ == "__main__":
     print("Numpy examples")
     x = numpy_examples()
     x.call_everything()
-

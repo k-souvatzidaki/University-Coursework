@@ -485,6 +485,8 @@ class numpy_examples():
         except:
             print("AttributeError: 'tuple' object has no attribute 'T'")
 
+
+    # ================ Call everything ================
     def call_everything(self):
         for name in dir(self):
             obj = getattr(self, name)
@@ -493,6 +495,7 @@ class numpy_examples():
                 obj()
 
 
+# main
 if __name__ == "__main__":
     print("Numpy examples")
     x = numpy_examples()

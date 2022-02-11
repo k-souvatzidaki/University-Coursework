@@ -37,9 +37,17 @@ class sympy_examples():
         #     |-- mul |-- 10
         #             |-- x
         print('\n')
+
+    def evalf(self):
+        # evaluates a given numerical expression upto a given floating point precision (upto 100 digits)
+        print("evalf examples")
+        sp.pprint(sp.sqrt(5).evalf(100))
+        sp.pprint(sp.pi.evalf(20))
+        sp.pprint(sp.cos(2).evalf()) # default = 15 digits
+        print('\n')
    
 
-    # ================ Factor, Simplify, Expand ================
+    # ================ Factor, Simplify, Expand, Collect ================
     def factor(self): 
         print("factor expressions")
         x = sp.symbols("x")
@@ -60,6 +68,23 @@ class sympy_examples():
         x,y = sp.symbols("x y")
         expr3 = ( x + y )**3
         sp.pprint(expr3.expand()) # x**3 + 3*x**2*y + 3*x*y**2 + y**3 
+        print('\n')
+
+    # collect: same powers of variables are collected together as a same mathematical expression
+    def collect(self):
+        print("collect example")
+        x,y,z = sp.symbols("x y z")
+        expr= x*y + x - 3 + 2*x**2 - z*x**2 + x**3
+        sp.pprint(sp.collect(expr,2)) # x**3 - x**2z + 2x**2 + xy + x -3
+        print('\n')
+
+    # coeff(x,n): find the coefficient of variables in mathematical expressions
+    def coefficient(self):
+        print("coefficient example")
+        x,y,z = sp.symbols("x y z")
+        expr= x*y + x - 3 + 2*x**2 - z*x**2 + x**3
+        sp.pprint(expr.coeff(x,2)) # 2 - z
+        sp.pprint(expr.coeff(x,3)) # 1
         print('\n')
 
     # trigonometric and logarithms

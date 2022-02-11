@@ -129,7 +129,7 @@ class sympy_examples():
 
 
     # ================ Non-linear Equation ================
-    def solve_equation(self): 
+    def non_linear(self): 
         print("solving a non linear equation")
         x, y = sp.symbols( "x y" )
         sp.pprint(sp.nonlinsolve(  [ 6 * x**2 + 3*y**2 - 12, x + y - 2 ], [x,y] )) # { (0,2) , (4/3,2/3) }

@@ -85,6 +85,7 @@ class matplotlib_examples():
         plt.show()
 
     def multiple_plots_2(self):
+        x = np.linspace( 0, 5, 50 )
         plt.figure(figsize=(15,10)) 
         # first subplot
         plt.subplot(3,3,1)
@@ -184,6 +185,7 @@ class matplotlib_examples():
 
     # ================ Custom labels ================
     def labels(self): 
+        x = np.linspace( 0, 5, 50 )
         # square root x symbol label
         plt.plot(np.sqrt(x))
         plt.xlabel('x')
@@ -206,9 +208,33 @@ class matplotlib_examples():
 
 
     # ================ Categorical plots ================
+    def categorical_plots(self):
+        continents = ['Europe', 'America', 'Asia', 'Africa', 'Oceania']
+        salary = [800, 1000, 100, 50, 900]
+        plt.figure(figsize=(20, 5))
+        # bars
+        plt.subplot(1,3,1)
+        plt.bar(continents, salary)
+        # scatter
+        plt.subplot(1,3,2)
+        plt.scatter(continents, salary)
+        # normal plt (line) (x = continets, y = salary)
+        plt.subplot(1,3,3)
+        plt.plot(continents, salary)
+        plt.suptitle('Categorical Plotting')
+        plt.show()
 
 
     # ================ Scatter ================
+    def scatter_example(self):
+        x = np.linspace(10,20,100)
+        y = np.random.permutation(x)
+        # plot
+        plt.plot(x,y,c='r', marker = '.', linestyle = ' ')
+        plt.show()
+        # scatter
+        plt.scatter(x, y, c = np.random.randn(len(x)), s = np.random.randn(len(x))*100,  alpha = 0.5)
+        plt.show()
 
 
     # ================ Call everything ================

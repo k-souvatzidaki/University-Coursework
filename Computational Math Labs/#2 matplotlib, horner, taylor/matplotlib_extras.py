@@ -141,6 +141,74 @@ class matplotlib_examples():
 
 
     # ================ Multiple plots as arrays (axes) ================
+    def axes_example_1(self): 
+        x = np.linspace( 0, 5, 50 )
+        fig, (axes) = plt.subplots( 2, 1 ) # new figure with 2 subplots in axes
+        fig.suptitle('Subplots referred with array') # title to whole graph
+        # 1st
+        axes[0].plot(x, np.cos( x ), 'bo' )
+        axes[0].set_ylabel('First')
+        # 2nd
+        axes[1].plot(x, np.sin(x), 'r--')
+        axes[1].set_ylabel( 'Second' )
+        axes[1].set_xlabel('x')
+        plt.show()
+
+    def axes_example_2(self): 
+        data1, data2, data3, data4 = np.random.randn(4, 100)  # making 4 random datasets of 100 elements each
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(5, 2.7))
+        ax1.plot(data1, data2, marker='x',c='m')
+        ax2.plot(data3, data4, marker='*',c='r')
+        plt.show()
+
+    def axes_example_3(self): 
+        x = np.linspace( 0, 5, 50 )
+        fig, (axes) = plt.subplots( 3, 2 , figsize = (10,10))
+        fig.suptitle('Subplots referred with array')#
+        # axes [0][0] remains empty (x = 1.0, y = 1.0)
+        axes[0][1].plot( x, x, 'b:' )
+        axes[0][1].set_ylabel('First')
+        axes[0][1].set_title('First plot')
+        # axes [1][1] remains empty but has a title
+        axes[1][1].set_title('Empty plot')
+        axes[1][0].plot( 4*x, x+5, 'r--')
+        axes[1][0].set_ylabel( 'Second' )
+        axes[1][0].set_xlabel('x')
+        axes[2][0].plot( x, x**4, 'g*')
+        axes[2][0].set_ylabel( 'Third' )
+        axes[2][0].set_xlabel('x')
+        axes[2][0].set_yscale('log')
+        # axes[2][1] remains empty
+        plt.show()
+
+
+    # ================ Custom labels ================
+    def labels(self): 
+        # square root x symbol label
+        plt.plot(np.sqrt(x))
+        plt.xlabel('x')
+        plt.ylabel(r'$\sqrt{x}$')
+        plt.show()
+        # x / 2 fraction label
+        plt.plot(x/2)
+        plt.xlabel('x')
+        plt.ylabel(r'$\frac{x}{2}$')
+        plt.show()
+        # e ^ x symbol label
+        plt.plot(np.exp(x))
+        plt.ylabel(r'$e^{x}$')
+        plt.show()
+        # α, β symbols, Σ (sum) labels
+        plt.plot(x)
+        plt.text(1,1,r'$\alpha_{i} > \beta_{i}$')
+        plt.title(r'$\sum_{i=0}^\infty\alpha_{i}$')
+        plt.show()
+
+
+    # ================ Categorical plots ================
+
+
+    # ================ Scatter ================
 
 
     # ================ Call everything ================

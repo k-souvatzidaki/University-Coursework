@@ -32,10 +32,10 @@ if __name__ == "__main__":
         plt.title( 'x = ' + str(val) )
     plt.show()
 
-    # plot values for Taylor order 1 to 4 of log(x+1) in a single graph
+    # plot values for Taylor order 1 to 20 of log(x+1) in a single graph
     L = np.linspace(-0.9,1, 20)
     plt.figure()
-    plt.plot(L,np.log(L+1), label = "exp")
+    plt.plot(L,np.log(L+1), label = "log(x+1")
     for i in range (0,20):
         estimations = []
         for k in range(0,20):

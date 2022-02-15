@@ -2,8 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 
-def Taylor( x0, order=50 ): # default: order 1 to 50
-    ans, num, term, series_sum, pow_x = 1,1,1,1,1
+def Taylor_exp( x0, order=50 ): # default: order 1 to 50
+    series_sum= 1
     errors = np.zeros((order+1,1)) # the errors are all 0 at start
     expected = np.exp(x0) # estimation
     errors[0] = np.abs( 1 - expected) 
@@ -20,7 +20,7 @@ if __name__ == "__main__":
     plt.figure()
     i = 1
     for val in x:
-        series_sum,errors = Taylor(val)
+        series_sum,errors = Taylor_exp(val)
         plt.subplot(2,4,i)
         i += 1
         plt.plot(errors/np.exp(val))
@@ -35,7 +35,7 @@ if __name__ == "__main__":
     for i in range (0,4):
         estimations = []
         for k in range(0,20):
-            series_sum,errors = Taylor(L[k],i)
+            series_sum,errors = Taylor_exp(L[k],i)
             estimations.append(series_sum)
         plt.plot(L,estimations,label = "order ="+str(i))
     plt.legend()

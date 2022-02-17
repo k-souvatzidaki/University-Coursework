@@ -31,25 +31,6 @@ def simpson(h, y):
     s += y[len(y)-1] # last term
     return h * s / 3.0
 
-def execute_trapezoid(hi,lo):
-    for num in _trapezoid_subs:
-        h = (hi-lo)/num # calculate the step (h)
-        # store num+1 points into x
-        # Use np.arange( start=..., stop=..., step=... )
-        x = np.arange(start=lo, stop=hi+h, step=h) # using arange to create an array
-        y = f(x)
-        estimated = trapezoid(h, y)
-        trapezoid_error.append(np.abs(_real_value - estimated))
-
-def execute_simpson(hi,lo):
-    for num in _simpson_subs:
-        h = (hi-lo)/num # calculate the step (h)
-        # store num+1 points into x
-        x = np.arange(start=lo, stop=hi+h, step=h)
-        y = f(x)
-        estimated = simpson(h, y)
-        simpson_error.append(np.abs(_real_value - estimated))
-
 def make_plots():
     # trapezoid
     plt.subplot( 2, 1, 1 )
@@ -75,7 +56,9 @@ if __name__ == "__main__":
         h = (hi-lo)/num # calculate the step (h)
         # store num+1 points into x
         # Use np.arange( start=..., stop=..., step=... )
-        x = np.arange(start=lo, stop=hi+h, step=h) # using arange to create an array
+        # x = np.arange(start=lo, stop=hi+h, step=h) # using arange to create an array
+        # alternative: 
+        x =np.linspace(lo,hi,num+1)
         y = f(x)
         estimated = trapezoid(h, y)
         trapezoid_error.append(np.abs(_real_value - estimated))
@@ -84,6 +67,8 @@ if __name__ == "__main__":
         h = (hi-lo)/num # calculate the step (h)
         # store num+1 points into x
         x = np.arange(start=lo, stop=hi+h, step=h)
+        # alternative: 
+        # x =np.linspace(lo,hi,num+1)
         y = f(x)
         estimated = simpson(h, y)
         simpson_error.append(np.abs(_real_value - estimated))
